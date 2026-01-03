@@ -4,7 +4,7 @@ const User = require('../models/User')
 
 exports.registerUser = async (email, password) => {
   const hashed = await bcrypt.hash(password, 10)
-  const user = await User.create({ email, password: hashed })
+  const user = await User.create({ email, password: hashed, role: 'user' })
   return user
 }
 
@@ -16,13 +16,13 @@ exports.loginUser = async (email, password) => {
   if (!valid) return null
 
   const accessToken = jwt.sign(
-    { id: user._id, email: user.email },
+    { id: user._id, email: user.email, role: user.role },
     process.env.JWT_ACCESS_SECRET,
     { expiresIn: '15min' }
   )
 
   const refreshToken = jwt.sign(
-    { id: user._id },
+    { id: user._id, },
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: '7d' }
   )
@@ -45,7 +45,7 @@ exports.refreshAccessToken = async (refreshToken) => {
     jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
 
     const newAccessToken = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_ACCESS_SECRET,
       { expiresIn: '15m' }
     )
