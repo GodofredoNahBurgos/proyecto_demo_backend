@@ -1,4 +1,4 @@
-const { registerUser, loginUser } = require('../services/auth.service')
+const { registerUser, loginUser, refreshAccessToken } = require('../services/auth.service')
 
 exports.register = async (req, res) => {
   const { email, password } = req.body
@@ -8,11 +8,23 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body
-  const token = await loginUser(email, password)
+  const tokens = await loginUser(email, password)
 
-  if (!token) {
+  if (!tokens) {
     return res.status(401).json({ error: 'invalid credentials' })
   }
 
-  res.json({ token })
+  res.json(tokens)
+}
+
+exports.refresh = async (req, res) => {
+  const { refreshToken } = req.body
+
+  const newAccessToken = await refreshAccessToken(refreshToken)
+
+  if (!newAccessToken) {
+    return res.status(401).json({ error: 'invalid refresh token' })
+  }
+
+  res.json({ accessToken: newAccessToken })
 }

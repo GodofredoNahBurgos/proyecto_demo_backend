@@ -15,11 +15,44 @@ exports.loginUser = async (email, password) => {
   const valid = await bcrypt.compare(password, user.password)
   if (!valid) return null
 
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
     { id: user._id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: '15min' }
   )
 
-  return token
+  const refreshToken = jwt.sign(
+    { id: user._id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: '7d' }
+  )
+
+  user.refreshToken = refreshToken
+
+  await user.save()
+
+  return { accessToken, refreshToken }
+  
 }
+
+exports.refreshAccessToken = async (refreshToken) => {
+  if (!refreshToken) return null
+
+  const user = await User.findOne({ refreshToken })
+  if (!user) return null
+
+  try {
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
+
+    const newAccessToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: '15m' }
+    )
+
+    return newAccessToken
+  } catch {
+    return null
+  }
+}
+
