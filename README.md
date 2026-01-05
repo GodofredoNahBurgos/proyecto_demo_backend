@@ -50,7 +50,7 @@ JWT_REFRESH_SECRET=...
 ```bash
 # backend
 npm install
-npm run dev
+npm start
 
 # frontend
 npm install

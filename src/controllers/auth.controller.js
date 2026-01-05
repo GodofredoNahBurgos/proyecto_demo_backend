@@ -1,9 +1,31 @@
 const { registerUser, loginUser, refreshAccessToken } = require('../services/auth.service')
 
 exports.register = async (req, res) => {
-  const { email, password } = req.body
-  const user = await registerUser(email, password)
-  res.status(201).json({ message: 'user created', userId: user._id })
+  
+  try {
+    
+    const { email, password, role } = req.body
+    const user = await registerUser(email, password, role)
+
+    res.status(201).json({
+      message: 'user created',
+      userId: user._id
+    })
+
+  } catch (err) {
+
+    if (err.message === 'USER_EXISTS') {
+      return res.status(409).json({
+        error: 'user already exists'
+      })
+    }
+
+    console.error(err)
+    res.status(500).json({
+      error: 'internal server error'
+    })
+
+  }
 }
 
 exports.login = async (req, res) => {

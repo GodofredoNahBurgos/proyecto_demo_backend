@@ -2,9 +2,25 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
 
-exports.registerUser = async (email, password) => {
+exports.registerUser = async (email, password, role) => {
+  const exists = await User.findOne({ email })
+  if (exists) {
+    throw new Error('USER_EXISTS')
+  }
+
   const hashed = await bcrypt.hash(password, 10)
-  const user = await User.create({ email, password: hashed, role: 'user' })
+
+  const data = {
+    email,
+    password: hashed
+  }
+
+  if (role) {
+    data.role = role
+  }
+
+  const user = await User.create(data)
+
   return user
 }
 
@@ -32,7 +48,7 @@ exports.loginUser = async (email, password) => {
   await user.save()
 
   return { accessToken, refreshToken }
-  
+
 }
 
 exports.refreshAccessToken = async (refreshToken) => {
