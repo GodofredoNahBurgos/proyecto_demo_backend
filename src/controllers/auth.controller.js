@@ -40,8 +40,8 @@ exports.login = async (req, res) => {
 }
 
 exports.refresh = async (req, res) => {
-  const { refreshToken } = req.body
 
+  const { refreshToken } = req.body
   const newAccessToken = await refreshAccessToken(refreshToken)
 
   if (!newAccessToken) {
@@ -49,4 +49,5 @@ exports.refresh = async (req, res) => {
   }
 
   res.json({ accessToken: newAccessToken })
+
 }

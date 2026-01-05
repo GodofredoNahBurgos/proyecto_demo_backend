@@ -58,6 +58,7 @@ exports.refreshAccessToken = async (refreshToken) => {
   if (!user) return null
 
   try {
+
     jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
 
     const newAccessToken = jwt.sign(
@@ -67,8 +68,11 @@ exports.refreshAccessToken = async (refreshToken) => {
     )
 
     return newAccessToken
+
   } catch {
+
     return null
+    
   }
 }
 
